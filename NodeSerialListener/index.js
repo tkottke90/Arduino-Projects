@@ -1,18 +1,22 @@
-const SerialPort = require('serialport');
-const parser = new SerialPort.parsers.Readline();
+'use strict'
 
-let appCalls = 0;
-let keyboardCalls = 0;
+const SerialPort = require('serialport');
+const parsers = SerialPort.parsers;
+
+const parser = new parsers.Readline({
+  delimiter: '\r\n'
+});
 
 var port = new SerialPort('COM3', { baudRate: 9600});
 
 port.pipe(parser);
 
-parser.on('open', () => {
-  console.log(`Arduino Serial Port Listeing on COM3`);
+port.on('open', () => {
+  console.log(`Ardiuno Port open on: COM3`);
 });
 
-parser.on('data', (data) => { 
-  console.log(data);
-  
-});
+// port.on('data', (data) => {
+//   console.log(data);
+// })
+
+parser.on('data', console.log);

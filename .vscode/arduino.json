@@ -1,5 +1,5 @@
 {
-    "sketch": "MyBlink.ino",
+    "sketch": "InteruptSensor.ino",
     "board": "arduino:avr:uno",
     "port": "COM3"
 }

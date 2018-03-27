@@ -24,12 +24,19 @@ class Button {
     public : 
       int buttonPin;
       int buttonState;
+      
       int lastButtonState = LOW;
-
+      int lastButtonChange = 0;
+      
       unsigned long lastDebounceTime = 0;
 
-      Button(int pinNumber) {
+      Button(int pinNumber, uint8_t buttonMode=OUTPUT) {
         buttonPin = pinNumber;
+        pinMode(pinNumber, buttonMode);
+      }
+
+      bool isPristine() {
+        return lastButtonChange == 0;
       }
 
       bool debounce(int reading) {
@@ -44,21 +51,16 @@ class Button {
           // delay, so take it as the actual current state:        
 
           // if the button state has changed:
-          
-          Serial.println(reading != buttonState ? "TRUE" : "FALSE");
           if (reading != buttonState) {
             buttonState = reading;
-
+            lastButtonChange = millis();
             // only toggle the LED if the new button state is HIGH
             return buttonState == HIGH;            
           } else {
             return false;
           }
         }
-
         lastButtonState = reading;
-
-        
       }
 
     private:
@@ -68,44 +70,29 @@ class Button {
 
 
 // constants won't change. They're used here to set pin numbers:
-const int buttonPin = 3;    // the number of the pushbutton pin
 const int ledPin = 13;      // the number of the LED pin
-Button b(3);
 
-// Variables will change:
-int ledState = HIGH;         // the current state of the output pin
-int buttonState;             // the current reading from the input pin
-int lastButtonState = LOW;   // the previous reading from the input pin
+// Construct Objects
+Button b(3, INPUT);
 
-// the following variables are unsigned longs because the time, measured in
-// milliseconds, will quickly become a bigger number than can be stored in an int.
-unsigned long lastDebounceTime = 0;  // the last time the output pin was toggled
-unsigned long debounceDelay = 50;    // the debounce time; increase if the output flickers
+int ledState = HIGH;
 
 void setup() {
   Serial.begin(9600);
 
   
   
-  pinMode(buttonPin, INPUT);
+  // pinMode(buttonPin, INPUT);
   pinMode(ledPin, OUTPUT);
 
-  // set initial LED state
-  digitalWrite(ledPin, ledState);
 }
 
 void loop() {
-  
-  bool test = b.debounce(digitalRead(buttonPin));
-  if (test) {
-    Serial.print("LED State Change: ");
-    Serial.println(ledState == 0 ? "ON" : "OFF");
-    Serial.println("");
+
+  if (b.debounce(digitalRead(b.buttonPin))){
     ledState = !ledState;
   }
 
-
-  // set the LED:
   digitalWrite(ledPin, ledState);
 
 }

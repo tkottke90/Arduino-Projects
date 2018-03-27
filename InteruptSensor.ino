@@ -73,11 +73,12 @@ class TempProbe {
       int tempReadCount = 0;
     } tempData;
 
-    TempProbe(int pinNumber):
+    TempProbe(int pinNumber, Scale scale = Fahrenheit):
       tempWire(pinNumber),
       sensors(&tempWire)
     {
       sensors.begin();
+      tempData.currentScale = scale;
     }
 
     void pollTemp() {
@@ -85,7 +86,7 @@ class TempProbe {
     }
 
     float getTempValue() {
-      switch(currentScale){
+      switch(tempData.currentScale){
         case Celsius:
           return sensors.getTempCByIndex(0);
           break;
@@ -93,26 +94,29 @@ class TempProbe {
           return sensors.getTempFByIndex(0);
           break;
         case Kelvin:
-          float kSensors = (sensors.getTempFByIndex(0) + 459.67f)*(5/9); 
+          return ((sensors.getTempFByIndex(0) + 459.67f)*(5.0f/9.0f)); 
           break;
       }
     }
 
     String getTempString() {
       String output = "";
-      switch(currentScale){
+      switch(tempData.currentScale){
         case Celsius:
           output += sensors.getTempCByIndex(0);
-          output += " \u00B0C"; 
+          output += " \u00B0C";
+          return output; 
           break;
         case Fahrenheit:
           output += sensors.getTempFByIndex(0);
           output += " \u00B0F"; 
+          return output;
           break;
         case Kelvin:
-          float kSensors = (sensors.getTempFByIndex(0) + 459.67f)*(5/9); 
+          float kSensors = ((sensors.getTempFByIndex(0) + 459.67f)*(5.0f/9.0f)); 
           output += kSensors;
           output += " K";
+          return output;
           break;
       }
     } 
@@ -158,8 +162,7 @@ void loop() {
   int endTime = millis();
 
   String tempData = "Temperature: ";
-  tempData += t.sensors.getTempFByIndex(0);
-  tempData += " \u00B0F";
+  tempData += t.getTempString();
   Serial.println(tempData);
 
   Serial.print("Start Time: "); Serial.println(startTime);

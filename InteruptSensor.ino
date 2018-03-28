@@ -60,6 +60,8 @@ class Button {
 };
 
 class TempProbe {
+  
+
   public:
     DallasTemperature sensors;
     OneWire tempWire; 
@@ -124,51 +126,49 @@ class TempProbe {
   private:
 };
 
-// constants won't change. They're used here to set pin numbers:
-const int ledPin = 13;      // the number of the LED pin
-
 // Construct Objects
-Button b(3, INPUT);
-TempProbe t(2);
+Button b(2, INPUT);
+TempProbe t(3);
 
-#define ONE_WIRE_BUS 2
-OneWire oneWire(ONE_WIRE_BUS);
-DallasTemperature sensors(&oneWire);
+const byte ledPin = 13;
+const byte interruptPin = 2;
 
-// App Variables
-int ledState = HIGH;
-
+volatile int count = 0;
+volatile unsigned long last_interupt_time = 0;
+volatile byte ledState = LOW;
 
 void setup() {
   Serial.begin(9600);
-
-  sensors.begin();
   
-  // pinMode(buttonPin, INPUT);
-  pinMode(ledPin, OUTPUT);
-  digitalWrite(ledPin, LOW);
+  pinMode(13, OUTPUT);
+
+  attachInterrupt(digitalPinToInterrupt(b.buttonPin), ISR_Button, HIGH);
 
 }
 
 void loop() {
-  
-  int startTime = millis();
+  digitalWrite(13,ledState);
 
-  Serial.print("Requesting temperature....");
-
+  Serial.print("Getting Temp.....");
   t.pollTemp();
   Serial.println("DONE");
 
-  int endTime = millis();
+  Serial.print("Temperature: "); Serial.println(t.getTempString());
+  Serial.println("===============================");
+  
+}
 
-  String tempData = "Temperature: ";
-  tempData += t.getTempString();
-  Serial.println(tempData);
 
-  Serial.print("Start Time: "); Serial.println(startTime);
-  Serial.print("End Time: "); Serial.println(endTime);
-  Serial.print("Scan Time: "); Serial.print(endTime - startTime); Serial.println(" ms");
-  //Serial.print("Temperature: "); Serial.print(t.sensors.getTempFByIndex(0)); Serial.println(" \u00B0F");
-  Serial.println("============================"); Serial.println("");
+void ISR_Button() {
+  unsigned long interuptTime = millis();
+  if (interuptTime - last_interupt_time > 200){
+    Serial.println("Button Pressed");
+    
+    ledState = !ledState;
+      
+    Serial.println(count);
+    count++;
+    last_interupt_time = interuptTime;
+  }
   
 }

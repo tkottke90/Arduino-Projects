@@ -155,12 +155,11 @@ class TempProbe {
       tempData.currentScale = scale;
     }
 
-  private:
 };
 
 // Construct Objects
 Button b(2, INPUT);
-TempProbe t(3);
+TempProbe t(7);
 
 LiquidCrystal lcd(8, 9, 10, 11, 12, 13);
 

@@ -1,5 +1,5 @@
 {
-    "sketch": "InteruptSensor.ino",
+    "sketch": "InteruptSensorwithLED.ino",
     "board": "arduino:avr:uno",
     "port": "COM3"
 }

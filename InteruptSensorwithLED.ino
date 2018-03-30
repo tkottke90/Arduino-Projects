@@ -6,33 +6,15 @@
 */
 
 // Declare Dependencies
+#include <Arduino.h>
 #include <DallasTemperature.h>
 #include <OneWire.h>
 #include <LiquidCrystal.h>
-
-const byte UpArrow [] = {
-  B00000,
-  B00100,
-  B01110,
-  B11111,
-  B00100,
-  B00100,
-  B00100,
-  B00100
-};
-
-const byte DownArrow[] = {
-  B00100,
-  B00100,
-  B00100,
-  B00100,
-  B11111,
-  B01110,
-  B00100,
-  B00000
-};
+#include <Keypad.h>
 
 enum Scale { Celsius, Fahrenheit, Kelvin };
+
+enum State { Menu, Setup, Time, Temp, Brew, BrewSetup };
 
 class Button {
     public : 
@@ -157,41 +139,144 @@ class TempProbe {
 
 };
 
+class Line {
+  public: 
+    String text = "";
+    int startPosition = 0;
+
+    Line(String newLine) {
+      text = newLine;
+    }
+
+    int getSize() {
+      return text.length();
+    }
+
+    String scrollText() {
+      char charBuf[text.length()];
+      text.toCharArray(charBuf, text.length());
+      int txtLen = strlen(charBuf);
+
+      String output = "";
+
+      for(int j = startPosition; j < txtLen; j++){
+        output += charBuf[j];
+      }
+
+      if (output.length() < 16){
+        for (int j = 0; j < (txtLen - output.length()); j++){
+          output += " ";
+        }
+      }
+      
+
+      startPosition = startPosition == txtLen ? 0 : startPosition + 1;
+      return output;
+    }
+
+    
+};
+
+class MenuLine {
+  char selector = '>';
+  String text = "";
+
+  bool isSelected = false;
+
+  MenuLine(String str){
+    text = str;
+  }
+
+
+};
+
+class DisplayLine {
+  String text = "";
+
+  DisplayLine(String str){
+    text = str;
+
+  }
+};
+
+
+
 // Construct Objects
 Button b(2, INPUT);
 TempProbe t(7);
 
 LiquidCrystal lcd(8, 9, 10, 11, 12, 13);
 
-const byte ledPin = 13;
-const byte interruptPin = 2;
+Line testLine("This is a test line that is too long for me to see");
 
-int count = 0;
+// Interupt Info
+const byte interruptPin = 2;
 volatile unsigned long last_interupt_time = 0;
-volatile byte ledState = LOW;
+
+// App Variables
+  int count = 0;
+
+  // Serial Port
+  bool serialTransmit = true; 
+
+  // Keypad
+  const byte ROWS = 4; //four rows
+  const byte COLS = 4; //four columns
+  char keys[ROWS][COLS] = {
+      {'1','2','3','A'},
+      {'4','5','6','B'},
+      {'7','8','9','C'},
+      {'*','0','#','D'}
+  };
+
+  byte rowPins[ROWS] = {17, 16, 15 ,14}; //connect to the row pinouts of the keypad
+  byte colPins[COLS] = {6, 5, 4, 3}; //connect to the column pinouts of the keypad
+
+  Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
 
 void setup() {
+  // Setup Serial Port
   Serial.begin(9600);
 
   lcd.begin(16,2);
   lcd.print("Booting....");
 
   attachInterrupt(digitalPinToInterrupt(b.buttonPin), ISR_Button, HIGH);
-
+  keypad.addEventListener(keypadEvent); 
 }
 
 void loop() {
+  if(count == 0){
+    lcd.clear();
+    lcd.print("   Brew Buddy");
+  }
+
+  char key = keypad.getKey();
+
+  if (testLine.getSize() > 16){
+    lcd.setCursor(0,1);
+    lcd.print(testLine.scrollText());
+  } else {
+    lcd.setCursor(0,1);
+    lcd.print(testLine.text);
+  }
+
+    //scrollInFromRight(0,"Settings");
 
   if ( count - (millis()/1000) > 1) {
-    Serial.print("Polling Themometer....");
-    t.pollTemp();
-    Serial.println("DONE");
+    // Serial.print("Polling Themometer....");
+    // t.pollTemp();
+    // Serial.println("DONE");
 
-    lcd.setCursor(0,0);
-    lcd.print("Current Temp: ");
-    lcd.setCursor(0,1);
-    lcd.print(t.getTempValue());
+    // lcd.setCursor(0,0);
+    // lcd.print("Current Temp: ");
+    // lcd.setCursor(0,1);
+    // lcd.print(t.getTempValue());
   }  
+
+  delay(350);
+  Serial.println(count);
+  count++;
 }
 
 
@@ -199,9 +284,31 @@ void ISR_Button() {
   unsigned long interuptTime = millis();
   if (interuptTime - last_interupt_time > 200){
       
-    ledState = !ledState;
 
     last_interupt_time = interuptTime;
   }
   
+}
+
+// Taking care of some special events.
+void keypadEvent(KeypadEvent key){
+    switch (keypad.getState()){
+    case PRESSED:
+        if (key == '#') {
+            
+        }
+        break;
+
+    case RELEASED:
+        if (key == '*') {
+            
+        }
+        break;
+
+    case HOLD:
+        if (key == '*') {
+            
+        }
+        break;
+    }
 }

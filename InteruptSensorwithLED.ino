@@ -144,6 +144,8 @@ class Line {
     String text = "";
     int startPosition = 0;
 
+    int lineSize = 16;
+
     Line(String newLine) {
       text = newLine;
     }
@@ -154,44 +156,48 @@ class Line {
 
     String scrollText() {
       char charBuf[text.length()];
-      text.toCharArray(charBuf, text.length());
+      text.toCharArray(charBuf, text.length()+1);
       int txtLen = strlen(charBuf);
 
       String output = "";
 
-      for(int j = startPosition; j < txtLen; j++){
-        output += charBuf[j];
-      }
-
-      if (output.length() < 16){
-        for (int j = 0; j < (txtLen - output.length()); j++){
-          output += " ";
+      if ((txtLen - startPosition) > lineSize){
+        for(int j = startPosition; j < txtLen; j++){
+          output += charBuf[j];
         }
-      }
-      
 
-      startPosition = startPosition == txtLen ? 0 : startPosition + 1;
+        startPosition++;
+      } else {
+        startPosition = 0;
+      }
+
+      Serial.print("Text: "); Serial.println(text);
+      Serial.print("Text Length:"); Serial.println(txtLen);
+      Serial.println(output);
+  
       return output;
     }
 
     
 };
 
-class MenuLine {
-  char selector = '>';
-  String text = "";
-
+class MenuLine: public Line {
+  char selector = '> ';
   bool isSelected = false;
 
   MenuLine(String str){
     text = str;
+    lineSize = 13;
   }
 
+  String drawLine(){
+    String output = "";
+    output += selector;
+  }
 
 };
 
-class DisplayLine {
-  String text = "";
+class DisplayLine: public Line {
 
   DisplayLine(String str){
     text = str;
@@ -254,10 +260,10 @@ void loop() {
   char key = keypad.getKey();
 
   if (testLine.getSize() > 16){
-    lcd.setCursor(0,1);
+    lcd.setCursor(0,0);
     lcd.print(testLine.scrollText());
   } else {
-    lcd.setCursor(0,1);
+    lcd.setCursor(0,0);
     lcd.print(testLine.text);
   }
 

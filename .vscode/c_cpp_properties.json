@@ -45,6 +45,7 @@
         {
             "name": "Win32",
             "includePath": [
+                "C:\\Users\\Thomas\\Documents\\Arduino\\hardware\\expressif\\esp32\\cores\\esp32",
                 "${workspaceRoot}",
                 "C:\\Users\\Thomas\\Documents\\Arduino\\libraries",
                 "C:\\Program Files(x86)\\Arduino\\libraries\\DallasTemperature",
@@ -58,18 +59,19 @@
             "intelliSenseMode": "msvc-x64",
             "browse": {
                 "path": [
+                    "C:\\Users\\Thomas\\Documents\\Arduino\\hardware\\expressif\\esp32\\cores\\esp32",
                     "${workspaceRoot}",
                     "C:\\Users\\Thomas\\Documents\\Arduino\\libraries",
                     "C:\\Users\\Thomas\\Documents\\Arduino\\hardware",
                     "C:\\Program Files(x86)\\Arduino\\libraries",
                     "C:\\Program Files(x86)\\Arduino\\hardware"
                 ],
-                "limitSymbolsToIncludedHeaders": true,
+                "limitSymbolsToIncludedHeaders": false,
                 "databaseFilename": ""
             },
             "cStandard": "c11",
             "cppStandard": "c++17"
         }
     ],
-    "version": 3
+    "version": 4
 }

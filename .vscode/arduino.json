@@ -1,5 +1,6 @@
 {
     "sketch": "InteruptSensorwithLED.ino",
-    "board": "arduino:avr:uno",
-    "port": "COM3"
+    "board": "expressif:esp32:featheresp32",
+    "port": "COM3",
+    "configuration": "FlashFreq=80,UploadSpeed=921600,DebugLevel=debug"
 }

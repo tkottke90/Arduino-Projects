@@ -7,12 +7,12 @@ const parser = new parsers.Readline({
   delimiter: '\r\n'
 });
 
-var port = new SerialPort('COM3', { baudRate: 9600});
+var port = new SerialPort('COM4', { baudRate: 115200});
 
 port.pipe(parser);
 
 port.on('open', () => {
-  console.log(`Ardiuno Port open on: COM3`);
+  console.log(`Ardiuno Port open on: COM4`);
 });
 
 port.once('data', () => {

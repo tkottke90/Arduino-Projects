@@ -146,8 +146,9 @@ class Line {
 
     int lineSize = 16;
 
-    Line(String newLine) {
+    Line(String newLine, int size=16) {
       text = newLine;
+      lineSize = size;
     }
 
     int getSize() {
@@ -162,7 +163,7 @@ class Line {
       String output = "";
 
       if ((txtLen - startPosition) > lineSize){
-        for(int j = startPosition; j < txtLen; j++){
+        for(int j = startPosition; j < lineSize; j++){
           output += charBuf[j];
         }
 
@@ -181,31 +182,49 @@ class Line {
     
 };
 
-class MenuLine: public Line {
-  char selector = '> ';
-  bool isSelected = false;
+class Display {
+  LiquidCrystal lcd;
+  
+  public:
+  Display(LiquidCrystal &lcd):
+  lcd(lcd)
+  {}
 
-  MenuLine(String str){
-    text = str;
-    lineSize = 13;
-  }
-
-  String drawLine(){
-    String output = "";
-    output += selector;
-  }
-
-};
-
-class DisplayLine: public Line {
-
-  DisplayLine(String str){
-    text = str;
-
+  void writeDisplay(String lineOne, String lineTwo){
+    lcd.setCursor(0,0);
+    lcd.print(lineOne);
+    Serial.print("Line One: ");
+    Serial.println(lineOne);
+    lcd.setCursor(0,1);
+    lcd.print(lineTwo);
+    Serial.print("Line Two: ");
+    Serial.println(lineTwo);
   }
 };
 
+// class MenuLine: public Line {
+//   char selector = '> ';
+//   bool isSelected = false;
 
+//   MenuLine(String str){
+//     text = str;
+//     lineSize = 13;
+//   }
+
+//   String drawLine(){
+//     String output = "";
+//     output += selector;
+//   }
+
+// };
+
+// class DisplayLine: public Line {
+
+//   DisplayLine(String str){
+//     text = str;
+
+//   }
+// };
 
 // Construct Objects
 Button b(2, INPUT);
@@ -215,6 +234,7 @@ LiquidCrystal lcd(8, 9, 10, 11, 12, 13);
 
 Line testLine("This is a test line that is too long for me to see");
 
+Display d(lcd);
 // Interupt Info
 const byte interruptPin = 2;
 volatile unsigned long last_interupt_time = 0;
@@ -222,6 +242,8 @@ volatile unsigned long last_interupt_time = 0;
 // App Variables
   int count = 0;
 
+  unsigned char myFlag = FLAG0;
+  
   // Serial Port
   bool serialTransmit = true; 
 
@@ -252,20 +274,18 @@ void setup() {
 }
 
 void loop() {
-  if(count == 0){
-    lcd.clear();
-    lcd.print("   Brew Buddy");
-  }
+  // if(count == 0){
+  //   lcd.clear();
+  //   lcd.print("   Brew Buddy");
+  // }
 
-  char key = keypad.getKey();
+  // char key = keypad.getKey();
 
-  if (testLine.getSize() > 16){
-    lcd.setCursor(0,0);
-    lcd.print(testLine.scrollText());
-  } else {
-    lcd.setCursor(0,0);
-    lcd.print(testLine.text);
-  }
+  // if (testLine.getSize() > 16){
+  //   d.writeDisplay(testLine.scrollText(), "");
+  // } else {
+  //   d.writeDisplay(testLine.text, "");
+  // }
 
     //scrollInFromRight(0,"Settings");
 
@@ -278,6 +298,15 @@ void loop() {
     // lcd.print("Current Temp: ");
     // lcd.setCursor(0,1);
     // lcd.print(t.getTempValue());
+
+    if(( FLAG1 & myFlag ) > 0){
+      Serial.print("Polling Themometer....");
+      t.pollTemp();
+      Serial.println("DONE");
+    }
+    lcd.clear();
+    lcd.setCursor(0,0);
+    lcd.print(ALL_FLAG);
   }  
 
   delay(350);
@@ -290,6 +319,11 @@ void ISR_Button() {
   unsigned long interuptTime = millis();
   if (interuptTime - last_interupt_time > 200){
       
+    if(( FLAG1 & myFlag ) != 0){
+      myFlag &= ~FLAG1;
+    } else {
+      myFlag |= FLAG1;
+    }
 
     last_interupt_time = interuptTime;
   }
